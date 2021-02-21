@@ -1,0 +1,13 @@
+Image	frames/c01_0003.png	66
+Image	frames/c01_0004.png	19.82
+Image	frames/c01_0005.png	2886
+Image	frames/c01_0006.png	28.86
+Image	frames/c01_0007.png	2  1.21.13
+Image	frames/c01_0008.png	617
+Image	frames/c01_0009.png	68.1956
+Image	frames/c01_0010.png	
+Image	frames/c01_0011.png	24.1.
+Image	frames/c01_0012.png	25.53
+Image	frames/c01_0013.png	2256.6.39
+Image	frames/c01_0015.png	2687
+Image	frames/c01_0017.png	985
