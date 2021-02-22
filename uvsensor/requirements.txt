@@ -1,10 +1,11 @@
 asyncio
+aiofiles
+aiohttp
 argparse
-threading
-shutil
 slack_sdk
 pyyaml
 flask
+numpy
 pandas
 matplotlib
 adafruit-circuitpython-ads1x15

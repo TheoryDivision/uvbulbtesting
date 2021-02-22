@@ -14,8 +14,7 @@ class DegTester:
         self.filepath = filepath
         self.imagepath = imagepath
 
-        with open(filepath, "a") as f:
-            f.write("Voltage, UV-C Power, Date, Time, Days Elapsed\n")
+        asyncio.run(writedata(["Voltage", "UV-C Power", "Date", "Time", "Days Elapsed"], filepath))
 
     async def scheduler(self, interval, function):
         while True:
@@ -25,7 +24,7 @@ class DegTester:
                 )
 
     async def readandwrite(self):
-        await data = self.sensor.getreading()
+        data = self.sensor.get_reading()
         await writedata(data, self.filepath)
 
     def copydata(self, newpath): copyfile(self.filepath, newpath)
@@ -34,7 +33,7 @@ class DegTester:
         self.gathertree = await asyncio.gather(
                 self.scheduler(self.sint*60, self.readandwrite),
                 self.scheduler(self.gint*60, self.grapher.genpost_graph)
-                )
+            )
 
     def start(self):
         asyncio.run(self.main())

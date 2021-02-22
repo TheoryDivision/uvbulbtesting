@@ -1,6 +1,6 @@
 import asyncio
 from slack_sdk.web.async_client import AsyncWebClient
-# from slack_sdk.errors import SlackApiError
+from slack_sdk.errors import SlackApiError
 import yaml
 
 import pandas as pd
@@ -13,21 +13,23 @@ class UVSlackGrapher:
         self.slack_client = AsyncWebClient(token=self.slack_config['SLACK_BOT_TOKEN'])
         self.filepath = filepath
         self.imagepath = imagepath
+        self.enableGraphs = False
         asyncio.run(self.init_messages())
 
     async def init_messages(self):
-        await client.chat_postMessage(
+        await self.slack_client.chat_postMessage(
                 channel=self.slack_config['CHANNEL'], 
                 text="UV Degredation Experiment Started")
-        graph_resp = await client.chat_postMessage(
+        graph_resp = await self.slack_client.chat_postMessage(
                 channel=self.slack_config['CHANNEL'], 
                 text="Graphs")
         self.graphts = graph_resp['ts']
 
     async def gen_graph(self):
-        data = pd.read(self.filepath, index_col='Days Elapsed')
+        data = pd.read_csv(self.filepath, index_col='Days Elapsed')
         plt.rcParams["figure.dpi"] = 200
         plot = data[['UV-C Power']].plot()
+        plot.set_ylabel(ylabel='mW/cm²')
         fig = plot.get_figure()
         fig.savefig(self.imagepath)
 
@@ -39,6 +41,8 @@ class UVSlackGrapher:
                 )
 
     async def genpost_graph(self):
-        await self.gen_graph()
-        await self.post_graph()
+        if self.enableGraphs:
+            await self.gen_graph()
+            await self.post_graph()
+        self.enableGraphs = True
 
