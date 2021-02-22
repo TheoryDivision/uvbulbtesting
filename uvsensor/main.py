@@ -19,7 +19,7 @@ if __name__ == "__main__":
 
     sensor = UVsensor(args.pin)
     tester = degTester(sensor, args.sint, args.gint, args.output, args.image)
-    bot = UVSlackBot(args.output, args.image)
+    bot = UVSlackBot(tester, args.output, args.image)
     bot_thread = threading.Thread(bot.start())
     bot_thread.start()
     tester.start()

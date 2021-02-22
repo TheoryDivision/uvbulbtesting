@@ -1,16 +1,16 @@
 from flask import Flask, Response
 from slackeventsapi import SlackEventAdapter
 import os
-import time
 from threading import Thread
 from slack import WebClient
-from dotenv import load_dotenv
-import psutil
-from shutil import copyfile
+import yaml
+
+from degtester import DegTester
 
 class UVSlackBot:
-    def __init__(self, filepath, imgpath):
+    def __init__(self, tester, filepath, imgpath):
         self.app = Flask(__name__)
+        self.tester = tester
 
         self.fpath = filepath
         self.ipath = imgpath
@@ -20,25 +20,27 @@ class UVSlackBot:
         self.greetings = ["hi", "hello", "hello there", "hey"]
         self.data_req = ["data", "send data", "data pls"]
 
-        SLACK_SIGNING_SECRET = os.environ['SLACK_SIGNING_SECRET']
-        slack_token = os.environ['SLACK_BOT_TOKEN']
-        VERIFICATION_TOKEN = os.environ['VERIFICATION_TOKEN']
+        self.slack_config = yaml.safe_load(open("slack_config.yml"))
 
-        #instantiating slack client
-        self.slack_client = WebClient(slack_token)
+        self.slack_client = WebClient(self.slack_config['SLACK_BOT_TOKEN'])
 
-        self.slack_events_adapter = SlackEventAdapter(
-            SLACK_SIGNING_SECRET, "/slack/events", self.app
-        )
+    # An example of one of your Flask app's routes
+    @app.route("/")
+    def event_hook(self, request):
+        json_dict = json.loads(request.body.decode("utf-8"))
+        if json_dict["token"] != self.slack_config['VERIFICATION_TOKEN']:
+            return {"status": 403}
 
-    def has_handle(self, fpath):
-        for proc in psutil.process_iter():
-            try:
-                for item in proc.open_files():
-                    if fpath == item.path:
-                        return True
-            except Exception:
-                pass
+        if "type" in json_dict:
+            if json_dict["type"] == "url_verification":
+                response_dict = {"challenge": json_dict["challenge"]}
+                return response_dict
+        return {"status": 500}
+        return
+
+    self.slack_events_adapter = SlackEventAdapter(
+        self.slack_config['SLACK_SIGNING_SECRET'], "/slack/events", self.app
+    )
 
     @self.slack_events_adapter.on("app_mention")
     def handle_message(self, event_data):
@@ -55,13 +57,9 @@ class UVSlackBot:
                     )
                     self.slack_client.chat_postMessage(channel=channel_id, text=message)
                 if any(item in command.lower() for item in self.data_req):
-                    while True:
-                        if not self.has_handle(self.fpath):
-                            copyfile(self.fpath, self.cpfpath)
-                            break
-                        else:
-                            time.sleep(1)
+                    self.tester.copydata(self.fpath, self.cpfpath)
                     self.slack_client.files_upload(channel=channel_id, file=self.cpfpath ,initial_comment="Here it is.")
+                    os.remove(self.cpfpath)
         thread = Thread(target=send_reply, kwargs={"value": event_data})
         thread.start()
         return Response(status=200)

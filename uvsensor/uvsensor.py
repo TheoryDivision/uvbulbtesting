@@ -13,7 +13,10 @@ class UVsensor:
         self.ads = ADS.ADS1015(self.i2c)
         self.chan = AnalogIn(self.ads, getattr(ADS,'P'+ pin))
         self.ads.gain = 2/3
+        self.exp_start = datetime.datetime.now()
 
     async def get_reading(self):
         nao = datetime.datetime.now()
-        return [self.chan.voltage, self.chan.voltage*4, nao.strftime("%x"), nao.strftime("%X")]
+        diff = self.exp_start - nao
+        days_elapsed = diff.total_seconds()/(12*60*60)
+        return [self.chan.voltage, self.chan.voltage*4, nao.strftime("%x"), nao.strftime("%X"), days_elapsed]
