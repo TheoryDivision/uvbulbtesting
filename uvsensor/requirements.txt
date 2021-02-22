@@ -1,2 +1,10 @@
 asyncio
 argparse
+threading
+shutil
+slack_sdk
+pyyaml
+flask
+pandas
+matplotlib
+adafruit-circuitpython-ads1x15

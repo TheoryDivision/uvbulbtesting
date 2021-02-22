@@ -2,10 +2,8 @@ import board
 import busio
 import adafruit_ads1x15.ads1015 as ADS
 from adafruit_ads1x15.analog_in import AnalogIn
-import csv
 import datetime
 import asyncio
-import time
 
 class UVsensor:
     def __init__(self, pin):
