@@ -1,5 +1,4 @@
 from slackeventsapi import SlackEventAdapter
-from slack_sdk import WebClient
 import yaml
 import os
 
