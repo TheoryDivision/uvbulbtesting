@@ -1,7 +1,7 @@
 #!/bin/python3
 
 import argparse
-from multiprocessing import Process
+import threading
 
 from uvsensor import UVsensor
 from degtester import DegTester
@@ -19,6 +19,6 @@ if __name__ == "__main__":
 
     sensor = UVsensor(args.pin)
     tester = DegTester(sensor, args.sint, args.gint, args.output, args.image)
-    bot = Process(target = uvbot, args = (tester, args.output, args.image))
+    bot = threading.Thread(target = uvbot, args = (tester, args.output, args.image))
     bot.start()
     tester.start()

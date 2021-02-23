@@ -12,6 +12,7 @@ class UVSlackGrapher:
         self.slack_client = AsyncWebClient(token=self.slack_config['SLACK_BOT_TOKEN'])
         self.filepath = filepath
         self.imagepath = imagepath
+        self.gs = False
         asyncio.run(self.init_messages())
 
     async def init_messages(self):
@@ -30,6 +31,7 @@ class UVSlackGrapher:
         plot.set_ylabel(ylabel='mW/cm²')
         fig = plot.get_figure()
         fig.savefig(self.imagepath)
+        if not self.gs: self.gs = True
 
     async def post_graph_rep(self):
         await self.slack_client.files_upload(

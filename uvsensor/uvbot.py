@@ -1,6 +1,5 @@
 from slackeventsapi import SlackEventAdapter
 import yaml
-import os
 
 from degtester import DegTester
 
@@ -27,7 +26,7 @@ def uvbot(tester, fpath, ipath):
                 elif any(txt in message.get('text').lower() for txt in data_req):
                     tester.upload_file(channel, "Here is the most recent file:", fpath)
                 elif any(txt in message.get('text').lower() for txt in graph_req):
-                    if os.path.exists(ipath):
+                    if tester.grapher.gs:
                         tester.upload_file(channel, "Here you go:", ipath)
                     else:
                         tester.send_message(channel, "A graph has not been generated yet. Check back later.")
