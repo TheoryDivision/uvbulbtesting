@@ -1,11 +1,11 @@
 #!/bin/python3
 
 import argparse
-import threading
+from multiprocessing import Process
 
 from uvsensor import UVsensor
 from degtester import DegTester
-# from uvbot import UVSlackBot
+from uvbot import uvbot
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='UV Degredation Slack Bot')
@@ -19,7 +19,6 @@ if __name__ == "__main__":
 
     sensor = UVsensor(args.pin)
     tester = DegTester(sensor, args.sint, args.gint, args.output, args.image)
-    # bot = UVSlackBot(tester, args.output, args.image)
-    # bot_thread = threading.Thread(bot.start())
-    # bot_thread.start()
+    bot = Process(target = uvbot, args = (tester, args.output, args.image))
+    bot.start()
     tester.start()

@@ -1,68 +1,40 @@
-from flask import Flask, Response
 from slackeventsapi import SlackEventAdapter
-import os
-from threading import Thread
-from slack import WebClient
+from slack_sdk import WebClient
 import yaml
+import os
 
 from degtester import DegTester
 
-class UVSlackBot:
-    def __init__(self, tester, filepath, imgpath):
-        self.app = Flask(__name__)
-        self.tester = tester
+def uvbot(tester, fpath, ipath):
+    greetings = ["hi", "hello", "hey", "hai"]
+    data_req = ["data", "csv"]
+    graph_req = ["graph", "plot"]
 
-        self.fpath = filepath
-        self.ipath = imgpath
-        base, ext = os.path.splitext(filepath)
-        self.cpfpath = base + '_new' + ext
+    slack_config = yaml.safe_load(open("slack_config.yml"))
+    slack_signing_secret = slack_config['SLACK_SIGNING_SECRET']
 
-        self.greetings = ["hi", "hello", "hello there", "hey"]
-        self.data_req = ["data", "send data", "data pls"]
+    slack_events_adapter = SlackEventAdapter(slack_signing_secret, "/slack/events")
 
-        self.slack_config = yaml.safe_load(open("slack_config.yml"))
-
-        self.slack_client = WebClient(self.slack_config['SLACK_BOT_TOKEN'])
-
-    # An example of one of your Flask app's routes
-    @app.route("/")
-    def event_hook(self, request):
-        json_dict = json.loads(request.body.decode("utf-8"))
-        if json_dict["token"] != self.slack_config['VERIFICATION_TOKEN']:
-            return {"status": 403}
-
-        if "type" in json_dict:
-            if json_dict["type"] == "url_verification":
-                response_dict = {"challenge": json_dict["challenge"]}
-                return response_dict
-        return {"status": 500}
-        return
-
-    self.slack_events_adapter = SlackEventAdapter(
-        self.slack_config['SLACK_SIGNING_SECRET'], "/slack/events", self.app
-    )
-
-    @self.slack_events_adapter.on("app_mention")
-    def handle_message(self, event_data):
-        def send_reply(value):
-            event_data = value
+    @slack_events_adapter.on("app_mention")
+    def handle_message(event_data):
             message = event_data["event"]
             if message.get("subtype") is None:
-                command = message.get("text")
-                channel_id = message["channel"]
-                if any(item in command.lower() for item in self.greetings):
-                    message = (
-                        "Hello <@%s>! :party_parrot:"
-                        % message["user"] 
-                    )
-                    self.slack_client.chat_postMessage(channel=channel_id, text=message)
-                if any(item in command.lower() for item in self.data_req):
-                    self.tester.copydata(self.fpath, self.cpfpath)
-                    self.slack_client.files_upload(channel=channel_id, file=self.cpfpath ,initial_comment="Here it is.")
-                    os.remove(self.cpfpath)
-        thread = Thread(target=send_reply, kwargs={"value": event_data})
-        thread.start()
-        return Response(status=200)
+                channel = message["channel"]
+                if any(txt in message.get('text').lower() for txt in greetings):
+                    tester.send_message(channel, f'Hello <@{message["user"]}>! :party_parrot:')
+                elif "uptime" in message.get('text').lower():
+                    days = round(tester.sensor.uptime(),2)
+                    tester.send_message(channel, f"{days} days")
+                elif any(txt in message.get('text').lower() for txt in data_req):
+                    tester.upload_file(channel, "Here is the most recent file:", fpath)
+                elif any(txt in message.get('text').lower() for txt in graph_req):
+                    if os.path.exists(ipath):
+                        tester.upload_file(channel, "Here you go:", ipath)
+                    else:
+                        tester.send_message(channel, "A graph has not been generated yet. Check back later.")
 
-    def start(self):
-        self.app.run(port=3000)
+    @slack_events_adapter.on("error")
+    def error_handler(err):
+        print("ERROR: " + str(err))
+
+    slack_events_adapter.start(port=3000)

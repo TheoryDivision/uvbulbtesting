@@ -2,7 +2,7 @@ import asyncio
 import sys
 
 from uvsensor import UVsensor
-from datasaver import writedata, copyfile
+from datasaver import backup_existing, writedata
 from uvgrapher import UVSlackGrapher
 
 class DegTester:
@@ -13,6 +13,7 @@ class DegTester:
         self.gint = gint
         self.filepath = filepath
         self.imagepath = imagepath
+        backup_existing(filepath, imagepath)
 
         asyncio.run(writedata(["Voltage", "UV-C Power", "Date", "Time", "Days Elapsed"], filepath))
 
@@ -27,12 +28,18 @@ class DegTester:
         data = self.sensor.get_reading()
         await writedata(data, self.filepath)
 
-    def copydata(self, newpath): copyfile(self.filepath, newpath)
+    def upload_file(self, channel, message, path): asyncio.run(self.grapher.upload_file(channel, message, path))
+
+    def send_message(self, channel, message): asyncio.run(self.grapher.send_message(channel, message))
+
+    async def staggered_graphing(self):
+        await asyncio.sleep(self.gint*60)
+        await self.scheduler(self.gint*60, self.grapher.genpost_graph)
 
     async def main(self):
         self.gathertree = await asyncio.gather(
                 self.scheduler(self.sint*60, self.readandwrite),
-                self.scheduler(self.gint*60, self.grapher.genpost_graph)
+                self.staggered_graphing()
             )
 
     def start(self):

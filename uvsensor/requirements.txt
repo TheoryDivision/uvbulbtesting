@@ -3,8 +3,8 @@ aiofiles
 aiohttp
 argparse
 slack_sdk
+slackeventsapi
 pyyaml
-flask
 numpy
 pandas
 matplotlib

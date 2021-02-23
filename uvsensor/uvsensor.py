@@ -3,7 +3,6 @@ import busio
 import adafruit_ads1x15.ads1015 as ADS
 from adafruit_ads1x15.analog_in import AnalogIn
 import datetime
-import asyncio
 
 class UVsensor:
     def __init__(self, pin):
@@ -13,8 +12,11 @@ class UVsensor:
         self.ads.gain = 2/3
         self.exp_start = datetime.datetime.now()
 
+    def uptime(self):
+        self.nao = datetime.datetime.now()
+        diff = self.nao - self.exp_start
+        return diff.total_seconds()/(12*60*60)
+
     def get_reading(self):
-        nao = datetime.datetime.now()
-        diff = nao - self.exp_start
-        days_elapsed = diff.total_seconds()/(12*60*60)
-        return [self.chan.voltage, self.chan.voltage*4, nao.strftime("%x"), nao.strftime("%X"), days_elapsed]
+        days_elapsed = self.uptime()
+        return [self.chan.voltage, self.chan.voltage*4, self.nao.strftime("%x"), self.nao.strftime("%X"), days_elapsed]

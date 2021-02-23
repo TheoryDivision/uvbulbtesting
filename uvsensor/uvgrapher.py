@@ -6,14 +6,12 @@ import yaml
 import pandas as pd
 import matplotlib.pyplot as plt
 
-
 class UVSlackGrapher:
-    def __init__(self, filepath, imagepath):
+    def __init__(self,filepath, imagepath):
         self.slack_config = yaml.safe_load(open("slack_config.yml"))
         self.slack_client = AsyncWebClient(token=self.slack_config['SLACK_BOT_TOKEN'])
         self.filepath = filepath
         self.imagepath = imagepath
-        self.enableGraphs = False
         asyncio.run(self.init_messages())
 
     async def init_messages(self):
@@ -25,7 +23,7 @@ class UVSlackGrapher:
                 text="Graphs")
         self.graphts = graph_resp['ts']
 
-    async def gen_graph(self):
+    def gen_graph(self):
         data = pd.read_csv(self.filepath, index_col='Days Elapsed')
         plt.rcParams["figure.dpi"] = 200
         plot = data[['UV-C Power']].plot()
@@ -33,7 +31,7 @@ class UVSlackGrapher:
         fig = plot.get_figure()
         fig.savefig(self.imagepath)
 
-    async def post_graph(self):
+    async def post_graph_rep(self):
         await self.slack_client.files_upload(
                 channels=self.slack_config['CHANNEL'], 
                 file=self.imagepath,
@@ -41,8 +39,18 @@ class UVSlackGrapher:
                 )
 
     async def genpost_graph(self):
-        if self.enableGraphs:
-            await self.gen_graph()
-            await self.post_graph()
-        self.enableGraphs = True
+        self.gen_graph()
+        await self.post_graph_rep()
+
+    async def send_message(self, channel, message):
+        await self.slack_client.chat_postMessage(
+                channel=channel, 
+                text=message)
+
+    async def upload_file(self, channel, message, path):
+        await self.slack_client.files_upload(
+                channels=channel, 
+                file=path,
+                initial_comment=message
+                )
 
