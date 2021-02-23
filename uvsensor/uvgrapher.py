@@ -24,7 +24,7 @@ class UVSlackGrapher:
                 text="Graphs")
         self.graphts = graph_resp['ts']
 
-    def gen_graph(self):
+    async def gen_graph(self):
         data = pd.read_csv(self.filepath, index_col='Days Elapsed')
         plt.rcParams["figure.dpi"] = 200
         plot = data[['UV-C Power']].plot()
@@ -41,7 +41,7 @@ class UVSlackGrapher:
                 )
 
     async def genpost_graph(self):
-        self.gen_graph()
+        await self.gen_graph()
         await self.post_graph_rep()
 
     async def send_message(self, channel, message):
