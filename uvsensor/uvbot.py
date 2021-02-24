@@ -51,7 +51,6 @@ def uvbot(tester, fpath, ipath):
                     else:
                         tester.send_message(channel, "A graph has not been generated yet. Check back later.")
 
-
     @slack_events_adapter.on("error")
     def error_handler(err):
         print("ERROR: " + str(err))
