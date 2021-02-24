@@ -34,6 +34,7 @@ class UVSlackGrapher:
         plot.set_ylabel(ylabel='mW/cm²')
         fig = plot.get_figure()
         fig.savefig(self.imagepath)
+        fig.clf(); plot = None; fig = None
         if not self.gs: self.gs = True
 
     async def post_graph_rep(self):
