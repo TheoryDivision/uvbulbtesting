@@ -9,7 +9,7 @@ from uvbot import uvbot
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='UV Degredation Slack Bot')
-    parser.add_argument('-p', '--pin', default='0', type=int, help='Pin of ADC sensor is attached to')
+    parser.add_argument('-p', '--pin', default='0', nargs='+', type=int, help='Pin(s) of ADC sensor is attached to')
     parser.add_argument('-s', '--sint', default='15', type=float, help='Interval (minutes) for sensing')
     parser.add_argument('-g', '--gint', default='90', type=float, help='Interval (minutes) for graphing')
     parser.add_argument('-o', '--output', default='uvdata.csv', type=str, help='File name for data')

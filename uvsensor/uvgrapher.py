@@ -7,11 +7,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 class UVSlackGrapher:
-    def __init__(self,filepath, imagepath):
+    def __init__(self, chans, filepath, imagepath):
         self.slack_config = yaml.safe_load(open("slack_config.yml"))
         self.slack_client = AsyncWebClient(token=self.slack_config['SLACK_BOT_TOKEN'])
         self.filepath = filepath
         self.imagepath = imagepath
+        self.chans = chans
         self.gs = False
         asyncio.run(self.init_messages())
 
@@ -27,7 +28,9 @@ class UVSlackGrapher:
     async def gen_graph(self):
         data = pd.read_csv(self.filepath, index_col='Days Elapsed')
         plt.rcParams["figure.dpi"] = 200
-        plot = data[['UV-C Power']].plot()
+        headers = []
+        for p in range(self.chans): headers.append(f"Pin {p} UV-C Power")
+        plot = data[headers].plot()
         plot.set_ylabel(ylabel='mW/cm²')
         fig = plot.get_figure()
         fig.savefig(self.imagepath)
