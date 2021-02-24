@@ -29,7 +29,7 @@ class UVSlackGrapher:
         data = pd.read_csv(self.filepath, index_col='Days Elapsed')
         plt.rcParams["figure.dpi"] = 200
         headers = []
-        for p in range(self.chans): headers.append(f"Pin {p} UV-C Power")
+        for p in self.chans: headers.append(f"Pin {p} UV-C Power")
         plot = data[headers].plot()
         plot.set_ylabel(ylabel='mW/cm²')
         fig = plot.get_figure()

@@ -7,7 +7,7 @@ from uvgrapher import UVSlackGrapher
 
 class DegTester:
     def __init__(self, sensor, sint, gint, filepath, imagepath):
-        self.chans = len(sensor.chan)
+        self.chans = list(sensor.chan.keys())
         self.grapher = UVSlackGrapher(self.chans, filepath, imagepath)
         self.sensor = sensor
         self.sint = sint
@@ -17,9 +17,9 @@ class DegTester:
         backup_existing(filepath, imagepath)
         
         headers = []
-        for p in range(self.chans):
+        for p in self.chans:
             headers.extend([f"Pin {p} Voltage", f"Pin {p} UV-C Power"])
-        asyncio.run(writedata(headers+["Date", "Time", "Days Elapsed"], filepath))
+        asyncio.run(writedata(headers + ["Date", "Time", "Days Elapsed"], filepath))
 
     async def scheduler(self, interval, function):
         while True:

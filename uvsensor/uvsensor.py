@@ -8,8 +8,8 @@ class UVsensor:
     def __init__(self, pin):
         self.i2c = busio.I2C(board.SCL, board.SDA)
         self.ads = ADS.ADS1015(self.i2c)
-        self.chan = []
-        for p in pin: self.chan.append(AnalogIn(self.ads, getattr(ADS,'P'+ str(p))))
+        self.chan = {}
+        for p in pin: self.chan[p] = AnalogIn(self.ads, getattr(ADS,'P'+ str(p)))
         self.ads.gain = 2/3
         self.exp_start = datetime.datetime.now()
 
@@ -21,7 +21,7 @@ class UVsensor:
     def get_reading(self):
         days_elapsed = self.uptime()
         readings = []
-        for p in self.chan:
-            v = p.voltage
+        for adc in self.chan.values():
+            v = adc.voltage
             readings.extend([v, v*4])
         return readings+[self.nao.strftime("%x"), self.nao.strftime("%X"), days_elapsed]
