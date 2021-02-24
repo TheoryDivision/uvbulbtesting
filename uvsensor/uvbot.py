@@ -4,7 +4,7 @@ import re
 
 from degtester import DegTester
 
-def uvbot(tester, fpath, ipath):
+def uvbot(tester):
     greetings = ["hi", "hello", "hey", "hai", "sup"]
     data_req = ["data", "csv"]
     graph_req = ["graph", "plot"]
@@ -33,7 +33,7 @@ def uvbot(tester, fpath, ipath):
                     days = round(tester.sensor.uptime(),2)
                     tester.send_message(channel, f"{days} days")
                 elif any(txt in mtext for txt in data_req):
-                    tester.upload_file(channel, "Here is the most recent file:", fpath)
+                    tester.upload_file(channel, "Here is the most recent file:", tester.filepath)
                 elif "param" in mtext:
                     tester.send_message(channel, f"Read/Write Interval: {tester.sint} minutes\nGraphing Interval: {tester.gint} minutes")
                 elif "adjust" in mtext:
@@ -47,7 +47,7 @@ def uvbot(tester, fpath, ipath):
                         tester.send_message(channel, f"Read/Write Interval: {tester.sint} minutes\nChanged Graphing Interval: {tester.gint} minutes")
                 elif any(txt in mtext for txt in graph_req):
                     if tester.grapher.gs:
-                        tester.upload_file(channel, "Here you go:", ipath)
+                        tester.upload_file(channel, "Here you go:", tester.imagepath)
                     else:
                         tester.send_message(channel, "A graph has not been generated yet. Check back later.")
 
