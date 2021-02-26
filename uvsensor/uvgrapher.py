@@ -5,6 +5,8 @@ import yaml
 
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.collections import PatchCollection
+from matplotlib.patches import Polygon
 
 class UVSlackGrapher:
     def __init__(self, chans, filepath, imagepath):
@@ -25,13 +27,33 @@ class UVSlackGrapher:
                 text="Graphs")
         self.graphts = graph_resp['ts']
 
-    async def gen_graph(self):
-        data = pd.read_csv(self.filepath, index_col='Days Elapsed')
+    def gen_graph(self):
+        data = pd.read_csv(self.filepath)
         plt.rcParams["figure.dpi"] = 200
+        chans = [0,1]
         headers = []
-        for p in self.chans: headers.append(f"Pin {p} UV-C Power")
-        plot = data[headers].plot()
+        for p in chans: headers.append(f"Pin {p} UV-C Power")
+        plot = data.plot(x = "Days Elapsed", y = headers, figsize=(9,9), zorder=2)
+        axes = plt.gca()
+        ymin, ymax = axes.get_ylim()
+        poly = []
+        for index, row in data.iterrows():
+            if index > 1:
+                if row["SUDS State"] == "On":
+                    points = [[data.loc[index-1,:]["Days Elapsed"], ymin], [row["Days Elapsed"], ymin], [row["Days Elapsed"], ymax], [data.loc[index-1,:]["Days Elapsed"], ymax]]
+                    polygon = plt.Polygon(points)
+                    poly.append(polygon)
+        coll=PatchCollection(poly, zorder=-1, color="tab:green", alpha=0.1, edgecolor=None, linewidth=None)
+        axes.add_collection(coll)
+        lines, labels = plot.get_legend_handles_labels()
+        tempax = plot.twinx()
+        data.plot(ax = tempax, x = "Days Elapsed", y="Temperature", c="tab:red", legend=False, alpha=0.75, zorder=1)
+        line, label = tempax.get_legend_handles_labels()
+        lines += line
+        labels += label
+        plot.legend(lines, labels, loc=2)
         plot.set_ylabel(ylabel='mW/cm²')
+        tempax.set_ylabel(ylabel='°C')
         fig = plot.get_figure()
         fig.savefig(self.imagepath)
         fig.clf(); plot = None; fig = None
@@ -41,11 +63,11 @@ class UVSlackGrapher:
         await self.slack_client.files_upload(
                 channels=self.slack_config['CHANNEL'], 
                 file=self.imagepath,
-                thread_ts = self.graphts
-                )
+                thread_ts = self.graphts)
+        print("uploaded")
 
     async def genpost_graph(self):
-        await self.gen_graph()
+        self.gen_graph()
         await self.post_graph_rep()
 
     async def send_message(self, channel, message):
@@ -57,6 +79,5 @@ class UVSlackGrapher:
         await self.slack_client.files_upload(
                 channels=channel, 
                 file=path,
-                initial_comment=message
-                )
+                initial_comment=message)
 

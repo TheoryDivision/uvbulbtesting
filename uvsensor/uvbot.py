@@ -16,10 +16,18 @@ def uvbot(tester):
 
     def extract_mins(string):
         numbers = re.findall(r"[-+]?\d*\.?\d+|[-+]?\d+", string)
-        if "min" in string:
+        if "sec" in string:
             return float(numbers[-1])
-        if "hour" in string:
+        if "min" in string:
             return float(numbers[-1]*60)
+        if "hour" in string:
+            return float(numbers[-1]*60*60)
+
+    def report_params(confirm): 
+        if confirm: tester.send_message(channel, "Confirmed.")
+        tester.send_message(channel, 
+                f"Read/Write Interval: {tester.sinton} minutes\n"\
+                        "Graphing Interval: {tester.gint} minutes")
 
     @slack_events_adapter.on("app_mention")
     def handle_message(event_data):
@@ -35,16 +43,18 @@ def uvbot(tester):
                 elif any(txt in mtext for txt in data_req):
                     tester.upload_file(channel, "Here is the most recent file:", tester.filepath)
                 elif "param" in mtext:
-                    tester.send_message(channel, f"Read/Write Interval: {tester.sint} minutes\nGraphing Interval: {tester.gint} minutes")
+                    report_params(False)
                 elif "adjust" in mtext:
                     if "rw" in mtext:
-                        tester.sint = extract_mins(mtext)
-                        tester.send_message(channel, "Confirmed.")
-                        tester.send_message(channel, f" Changed Read/Write Interval: {tester.sint} minutes\nGraphing Interval: {tester.gint} minutes")
+                        if "on" in mtext:
+                            tester.sinton = extract_mins(mtext)
+                            report_params(True)
+                        elif "off" in mtext:
+                            tester.sintoff = extract_mins(mtext)
+                            report_params(True)
                     elif "graph" in mtext:
                         tester.gint = extract_mins(mtext)
-                        tester.send_message(channel, "Confirmed.")
-                        tester.send_message(channel, f"Read/Write Interval: {tester.sint} minutes\nChanged Graphing Interval: {tester.gint} minutes")
+                        report_params(True)
                 elif any(txt in mtext for txt in graph_req):
                     if tester.grapher.gs:
                         tester.upload_file(channel, "Here you go:", tester.imagepath)
