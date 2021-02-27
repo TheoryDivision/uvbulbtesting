@@ -40,7 +40,6 @@ class DegTester:
 
     async def readandwrite(self):
         data = await self.sensor.get_reading()
-        print(data)
         await writedata(data, self.filepath)
 
     def upload_file(self, channel, message, path): asyncio.run(self.grapher.upload_file(channel, message, path))

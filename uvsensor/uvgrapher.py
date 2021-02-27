@@ -66,7 +66,6 @@ class UVSlackGrapher:
                 channels=self.slack_config['CHANNEL'], 
                 file=self.imagepath,
                 thread_ts = self.graphts)
-        print("uploaded")
 
     async def genpost_graph(self):
         self.gen_graph()
