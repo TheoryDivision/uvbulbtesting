@@ -36,8 +36,9 @@ class DegTester:
     async def poweroff(self):
         if self.sensetask is not None: self.sensetask.cancel()
         self.sensor.turnoff()
+        await asyncio.sleep(self.sintoff)
         self.sensetask = asyncio.create_task(self.scheduler(self.sintoff, self.readandwrite))
-        await asyncio.sleep(self.off)
+        await asyncio.sleep(self.off - self.sintoff)
         self.powertask = asyncio.create_task(self.poweron())
         self.cycles += 1
 

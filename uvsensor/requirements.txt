@@ -1,5 +1,6 @@
 asyncio
 aiofiles
+aiocsv
 aiohttp
 argparse
 slack_sdk
@@ -9,3 +10,4 @@ numpy
 pandas
 matplotlib
 adafruit-circuitpython-ads1x15
+w1thermsensor
