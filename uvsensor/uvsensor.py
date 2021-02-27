@@ -14,7 +14,6 @@ class UVsensor:
         self.ads = ADS.ADS1015(self.i2c)
         self.chan = {}
         for p in pin: self.chan[p] = AnalogIn(self.ads, getattr(ADS,'P'+ str(p)))
-        self.ads.gain = 2/3
 
         self.gpiop = gpiop
         GPIO.setmode(GPIO.BCM)
