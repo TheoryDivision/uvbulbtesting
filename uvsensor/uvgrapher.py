@@ -49,7 +49,7 @@ class UVSlackGrapher:
         axes.add_collection(coll)
         lines, labels = plot.get_legend_handles_labels()
         tempax = plot.twinx()
-        data.plot(ax = tempax, x = "Days Elapsed", y="Temperature", c="tab:red", legend=False, alpha=0.6, zorder=1)
+        data.plot(ax = tempax, x = "Days Elapsed", y="Temperature", c="tab:red", legend=False, alpha=0.6, style=['o'], zorder=1)
         line, label = tempax.get_legend_handles_labels()
         lines += line
         labels += label
