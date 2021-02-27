@@ -2,7 +2,7 @@ import asyncio
 import sys
 
 from uvsensor import UVsensor
-from datasaver import backup_existing, writedata, lastline
+from datasaver import backup_existing, writedata
 from uvgrapher import UVSlackGrapher
 
 class DegTester:
@@ -13,6 +13,7 @@ class DegTester:
         self.sensor = sensor
         backup_existing(self.filepath, self.imagepath)
         self.sensetask = None
+        self.cycles = 0
         
         self.headers = []
         for p in self.chans:
@@ -38,6 +39,7 @@ class DegTester:
         self.sensetask = asyncio.create_task(self.scheduler(self.sintoff, self.readandwrite))
         await asyncio.sleep(self.off)
         self.powertask = asyncio.create_task(self.poweron())
+        self.cycles += 1
 
     async def readandwrite(self):
         self.data = await self.sensor.get_reading()

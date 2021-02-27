@@ -8,6 +8,7 @@ def uvbot(tester):
     greetings = ["hi", "hello", "hey", "hai", "sup"]
     data_req = ["data", "csv"]
     graph_req = ["graph", "plot"]
+    cycle_req = ["cycle", "loop"]
 
     slack_config = yaml.safe_load(open("slack_config.yml"))
     slack_signing_secret = slack_config['SLACK_SIGNING_SECRET']
@@ -63,6 +64,8 @@ def uvbot(tester):
                     tester.send_message(channel, uptimetext)
                 elif any(txt in mtext for txt in data_req):
                     tester.upload_file(channel, "Here is the most recent file:", tester.filepath)
+                elif any(txt in mtext for txt in cycle_req):
+                    tester.send_message(channel, "Cycles: {tester.cycles}")
                 elif "latest" in mtext:
                     tester.sendlastline(channel)
                 elif "param" in mtext:
