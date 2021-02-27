@@ -15,46 +15,79 @@ def uvbot(tester):
     slack_events_adapter = SlackEventAdapter(slack_signing_secret, "/slack/events")
 
     def extract_mins(string):
-        numbers = re.findall(r"[-+]?\d*\.?\d+|[-+]?\d+", string)
-        if "sec" in string:
-            return float(numbers[-1])
-        if "min" in string:
-            return float(numbers[-1]*60)
+        numbers = re.findall("[-+]?\d*\.?\d+|[-+]?\d+", string)
         if "hour" in string:
-            return float(numbers[-1]*60*60)
+            return float(numbers[-1])*60*60
+        elif "min" in string:
+            return float(numbers[-1])*60
+        elif "sec" in string:
+            return float(numbers[-1])
 
-    def report_params(confirm): 
+    def report_params(confirm, channel): 
         if confirm: tester.send_message(channel, "Confirmed.")
         tester.send_message(channel, 
-                f"Read/Write Interval: {tester.sinton} minutes\n"\
-                        "Graphing Interval: {tester.gint} minutes")
+                "Power Cycle Interval:\n"\
+                f"\t On: {tester.on/60} minutes\n"\
+                f"\t Off: {tester.off/60} minutes\n"\
+                "Read/Write Interval:\n"\
+                f"\t On: {tester.sinton} seconds\n"\
+                f"\t Off: {tester.sintoff} seconds\n"\
+                "Graphing:\n"\
+                f"\t Interval: {tester.gint/60} minutes\n"\
+                f"\t Lines to Graph: {tester.grapher.graphlast} lines of data")
+
+    def secondsToText(secs):     
+        if secs:
+            days = secs//86400
+            hours = (secs - days*86400)//3600
+            minutes = (secs - days*86400 - hours*3600)//60
+            seconds = secs - days*86400 - hours*3600 - minutes*60
+            result = ("{0} day{1}, ".format(days, "s" if days!=1 else "") if days else "") + \
+            ("{0} hour{1}, ".format(hours, "s" if hours!=1 else "") if hours else "") + \
+            ("{0} minute{1}, ".format(minutes, "s" if minutes!=1 else "") if minutes else "") + \
+            ("{0} second{1}, ".format(seconds, "s" if seconds!=1 else "") if seconds else "")
+            return result[:-2]
+        else:
+            return "0 seconds"
 
     @slack_events_adapter.on("app_mention")
     def handle_message(event_data):
             message = event_data["event"]
-            mtext = message.get('text').lower()
+            mtext = re.sub("<[^>]*>", "", message.get('text').lower())
             if message.get("subtype") is None:
                 channel = message["channel"]
                 if any(txt in mtext for txt in greetings):
                     tester.send_message(channel, f'Hello <@{message["user"]}>! :party_parrot:')
                 elif "uptime" in mtext:
-                    days = round(tester.sensor.uptime(),2)
-                    tester.send_message(channel, f"{days} days")
+                    uptimetext = secondsToText(int(tester.sensor.uptime()))
+                    tester.send_message(channel, uptimetext)
                 elif any(txt in mtext for txt in data_req):
                     tester.upload_file(channel, "Here is the most recent file:", tester.filepath)
                 elif "param" in mtext:
-                    report_params(False)
+                    report_params(False, channel)
                 elif "adjust" in mtext:
+                    if "power" in mtext:
+                        if "on" in mtext:
+                            tester.on = extract_mins(mtext)
+                            report_params(True, channel)
+                        elif "off" in mtext:
+                            tester.off = extract_mins(mtext)
+                            report_params(True, channel)
                     if "rw" in mtext:
                         if "on" in mtext:
                             tester.sinton = extract_mins(mtext)
-                            report_params(True)
+                            report_params(True, channel)
                         elif "off" in mtext:
                             tester.sintoff = extract_mins(mtext)
-                            report_params(True)
+                            report_params(True, channel)
                     elif "graph" in mtext:
-                        tester.gint = extract_mins(mtext)
-                        report_params(True)
+                        if "int" in mtext:
+                            tester.gint = extract_mins(mtext)
+                            report_params(True, channel)
+                        if "line" in mtext:
+                            numbers = re.findall("[-+]?\d*\.?\d+|[-+]?\d+", mtext)
+                            tester.grapher.graphlast = int(numbers[-1])
+                            report_params(True, channel)
                 elif any(txt in mtext for txt in graph_req):
                     if tester.grapher.gs:
                         tester.upload_file(channel, "Here you go:", tester.imagepath)

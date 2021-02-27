@@ -9,7 +9,7 @@ class DegTester:
     def __init__(self, sensor, args):
         self.__dict__.update(args.__dict__)
         self.chans = list(sensor.chan.keys())
-        self.grapher = UVSlackGrapher(self.chans, self.filepath, self.imagepath)
+        self.grapher = UVSlackGrapher(self.chans, self.graphlast, self.filepath, self.imagepath)
         self.sensor = sensor
         backup_existing(self.filepath, self.imagepath)
         self.sensetask = None

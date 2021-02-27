@@ -9,11 +9,12 @@ from matplotlib.collections import PatchCollection
 from matplotlib.patches import Polygon
 
 class UVSlackGrapher:
-    def __init__(self, chans, filepath, imagepath):
+    def __init__(self, chans, graphlast, filepath, imagepath):
         self.slack_config = yaml.safe_load(open("slack_config.yml"))
         self.slack_client = AsyncWebClient(token=self.slack_config['SLACK_BOT_TOKEN'])
         self.filepath = filepath
         self.imagepath = imagepath
+        self.graphlast = graphlast
         self.chans = chans
         self.gs = False
         asyncio.run(self.init_messages())
@@ -28,7 +29,8 @@ class UVSlackGrapher:
         self.graphts = graph_resp['ts']
 
     def gen_graph(self):
-        data = pd.read_csv(self.filepath)
+        rawdata = pd.read_csv(self.filepath)
+        data = rawdata.tail(self.graphlast)
         plt.rcParams["figure.dpi"] = 200
         chans = [0,1]
         headers = []
@@ -43,7 +45,7 @@ class UVSlackGrapher:
                     points = [[data.loc[index-1,:]["Days Elapsed"], ymin], [row["Days Elapsed"], ymin], [row["Days Elapsed"], ymax], [data.loc[index-1,:]["Days Elapsed"], ymax]]
                     polygon = plt.Polygon(points)
                     poly.append(polygon)
-        coll=PatchCollection(poly, zorder=-1, color="tab:green", alpha=0.1, edgecolor=None, linewidth=None)
+        coll=PatchCollection(poly, zorder=-1, color="tab:green", alpha=0.125, edgecolor=None, linewidth=None)
         axes.add_collection(coll)
         lines, labels = plot.get_legend_handles_labels()
         tempax = plot.twinx()
