@@ -50,7 +50,7 @@ class DegTester:
     def send_message(self, channel, message): asyncio.run(self.grapher.send_message(channel, message))
 
     def sendlastline(self, channel):
-        message = "\n".join("{}:\t{}".format(x, str(y)) for x, y in zip(self.headers, self.data))
+        message = "\n".join(f"{x}:\t{str(y)}" for x, y in zip(self.headers, self.data))
         self.send_message(channel, message)
 
     async def graph(self):
