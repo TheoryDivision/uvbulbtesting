@@ -1,6 +1,6 @@
 import asyncio
 import aiofiles
-from aiocsv import AsyncWriter
+from aiocsv import AsyncReader, AsyncWriter
 
 import os
 from datetime import datetime
@@ -23,7 +23,3 @@ async def writedata(data, filepath):
         writer = AsyncWriter(f, dialect="unix")
         await writer.writerow(data)
 
-async def lastline(filepath):
-    async with aiofiles.open(filepath, "a", encoding="utf-8", newline="") as f:
-        lastline = await f.readlines()[-1]
-    return lastline

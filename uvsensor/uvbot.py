@@ -64,7 +64,7 @@ def uvbot(tester):
                 elif any(txt in mtext for txt in data_req):
                     tester.upload_file(channel, "Here is the most recent file:", tester.filepath)
                 elif "latest" in mtext:
-                    tester.lastline(channel)
+                    tester.sendlastline(channel)
                 elif "param" in mtext:
                     report_params(False, channel)
                 elif "adjust" in mtext:

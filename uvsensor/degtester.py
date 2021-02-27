@@ -2,7 +2,7 @@ import asyncio
 import sys
 
 from uvsensor import UVsensor
-from datasaver import backup_existing, writedata
+from datasaver import backup_existing, writedata, lastline
 from uvgrapher import UVSlackGrapher
 
 class DegTester:
@@ -17,7 +17,7 @@ class DegTester:
         self.headers = []
         for p in self.chans:
             self.headers.extend([f"Pin {p} Voltage", f"Pin {p} UV-C Power"])
-            self.headers = self.headers + ["Temperature", "Date", "Time", "SUDS State","Days Elapsed"]
+        self.headers = self.headers + ["Temperature", "Date", "Time", "SUDS State","Days Elapsed"]
         asyncio.run(writedata(self.headers, self.filepath))
 
     async def scheduler(self, interval, function):
@@ -40,16 +40,15 @@ class DegTester:
         self.powertask = asyncio.create_task(self.poweron())
 
     async def readandwrite(self):
-        data = await self.sensor.get_reading()
-        await writedata(data, self.filepath)
+        self.data = await self.sensor.get_reading()
+        await writedata(self.data, self.filepath)
 
     def upload_file(self, channel, message, path): asyncio.run(self.grapher.upload_file(channel, message, path))
 
     def send_message(self, channel, message): asyncio.run(self.grapher.send_message(channel, message))
 
-    def lastline(self, channel):
-        latestdata = asyncio.run(sensor.lastline)
-        message = "\n".join("{} {}".format(x, y) for x, y in zip(self.headers, latestdata))
+    def sendlastline(self, channel):
+        message = "\n".join("{}:\t{}".format(x, str(y)) for x, y in zip(self.headers, self.data))
         self.send_message(channel, message)
 
     async def graph(self):
