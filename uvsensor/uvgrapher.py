@@ -35,7 +35,7 @@ class UVSlackGrapher:
         chans = [0,1]
         headers = []
         for p in chans: headers.append(f"Pin {p} UV-C Power")
-        plot = data.plot(x = "Days Elapsed", y = headers, figsize=(9,9), zorder=2)
+        plot = data.plot(x = "Days Elapsed", y = headers, figsize=(9,9), zorder=2, style=['o']*len(headers))
         axes = plt.gca()
         ymin, ymax = axes.get_ylim()
         poly = []
@@ -49,7 +49,7 @@ class UVSlackGrapher:
         axes.add_collection(coll)
         lines, labels = plot.get_legend_handles_labels()
         tempax = plot.twinx()
-        data.plot(ax = tempax, x = "Days Elapsed", y="Temperature", c="tab:red", legend=False, alpha=0.75, zorder=1)
+        data.plot(ax = tempax, x = "Days Elapsed", y="Temperature", c="tab:red", legend=False, alpha=0.6, zorder=1)
         line, label = tempax.get_legend_handles_labels()
         lines += line
         labels += label
