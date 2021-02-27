@@ -16,7 +16,7 @@ if __name__ == "__main__":
     parser.add_argument('-sn', '--sinton', default='5', type=float, help='Interval (seconds) for sensing when device is on')
     parser.add_argument('-sf', '--sintoff', default='10', type=float, help='Interval (seconds) for sensing when device is off')
     parser.add_argument('-g', '--gint', default='90', type=float, help='Interval (minutes) for graphing')
-    parser.add_argument('-l', '--graphlast', default='4760', type=int, help='Lines of data to graph')
+    parser.add_argument('-l', '--graphlast', default='1200', type=int, help='Lines of data to graph')
     parser.add_argument('-o', '--filepath', default='uvdata.csv', type=str, help='File name for data')
     parser.add_argument('-i', '--imagepath', default='graph.png', type=str, help='Image name for graph')
 
