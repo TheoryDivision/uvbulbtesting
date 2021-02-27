@@ -38,7 +38,7 @@ class UVsensor:
 
     async def get_reading(self):
         temp = await self.tempsensor.get_temperature()
-        days_elapsed = self.uptime()/(12*60*60)
+        days_elapsed = self.uptime()/(24*60*60)
         readings = []
         state = "On" if self.powerstate else "Off"
         for adc in self.chan.values():

@@ -14,10 +14,11 @@ class DegTester:
         backup_existing(self.filepath, self.imagepath)
         self.sensetask = None
         
-        headers = []
+        self.headers = []
         for p in self.chans:
-            headers.extend([f"Pin {p} Voltage", f"Pin {p} UV-C Power"])
-        asyncio.run(writedata(headers + ["Temperature", "Date", "Time", "SUDS State","Days Elapsed"], self.filepath))
+            self.headers.extend([f"Pin {p} Voltage", f"Pin {p} UV-C Power"])
+            self.headers = self.headers + ["Temperature", "Date", "Time", "SUDS State","Days Elapsed"]
+        asyncio.run(writedata(self.headers, self.filepath))
 
     async def scheduler(self, interval, function):
         while True:
@@ -46,6 +47,11 @@ class DegTester:
 
     def send_message(self, channel, message): asyncio.run(self.grapher.send_message(channel, message))
 
+    def lastline(self, channel):
+        latestdata = asyncio.run(sensor.lastline)
+        message = "\n".join("{} {}".format(x, y) for x, y in zip(self.headers, latestdata))
+        self.send_message(channel, message)
+
     async def graph(self):
         await asyncio.gather(asyncio.sleep(self.gint),
                                 self.grapher.genpost_graph())
@@ -54,7 +60,7 @@ class DegTester:
     async def main(self):
         self.powertask = asyncio.create_task(self.poweron())
         await asyncio.sleep(self.gint)
-        await self.graph()
+        self.graphtask = asyncio.create_task(self.graph())
 
     def start(self):
         self.loop = asyncio.new_event_loop()
