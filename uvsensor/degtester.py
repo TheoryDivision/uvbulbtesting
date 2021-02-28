@@ -23,13 +23,13 @@ class DegTester:
 
     async def scheduler(self, interval, function):
         while True:
-            await asyncio.gather(asyncio.sleep(interval),
+            await asyncio.gather(asyncio.sleep(eval(interval)),
                     function())
 
     async def poweron(self):
         if self.sensetask is not None: self.sensetask.cancel()
         self.sensor.turnon()
-        self.sensetask = asyncio.create_task(self.scheduler(self.sinton, self.readandwrite))
+        self.sensetask = asyncio.create_task(self.scheduler("self.sinton", self.readandwrite))
         await asyncio.sleep(self.on)
         self.powertask = asyncio.create_task(self.poweroff())
 
@@ -37,7 +37,7 @@ class DegTester:
         if self.sensetask is not None: self.sensetask.cancel()
         self.sensor.turnoff()
         await asyncio.sleep(self.sintoff)
-        self.sensetask = asyncio.create_task(self.scheduler(self.sintoff, self.readandwrite))
+        self.sensetask = asyncio.create_task(self.scheduler("self.sintoff", self.readandwrite))
         await asyncio.sleep(self.off - self.sintoff)
         self.powertask = asyncio.create_task(self.poweron())
         self.cycles += 1
@@ -54,17 +54,10 @@ class DegTester:
         message = "\n".join(f"{x}:\t{str(y)}" for x, y in zip(self.headers, self.data))
         self.send_message(channel, message)
 
-    async def graph_scheduler(self): self.graphtask = asyncio.create_task(self.graph())
-
-    async def graph(self):
-        await asyncio.gather(asyncio.sleep(self.gint),
-                                self.grapher.genpost_graph())
-        asyncio.create_task(self.graph_scheduler())
-
     async def main(self):
         self.powertask = asyncio.create_task(self.poweron())
         await asyncio.sleep(self.gint)
-        asyncio.create_task(self.graph_scheduler())
+        self.graphtask = asyncio.create_task(self.scheduler("self.gint", self.grapher.genpost_graph))
 
     def start(self):
         self.loop = asyncio.new_event_loop()
