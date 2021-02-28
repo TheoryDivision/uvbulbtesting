@@ -54,15 +54,17 @@ class DegTester:
         message = "\n".join(f"{x}:\t{str(y)}" for x, y in zip(self.headers, self.data))
         self.send_message(channel, message)
 
+    async def graph_scheduler(self): self.graphtask = asyncio.create_task(self.graph())
+
     async def graph(self):
         await asyncio.gather(asyncio.sleep(self.gint),
                                 self.grapher.genpost_graph())
-        self.graphtask = asyncio.create_task(self.graph())
+        asyncio.create_task(self.graph_scheduler())
 
     async def main(self):
         self.powertask = asyncio.create_task(self.poweron())
         await asyncio.sleep(self.gint)
-        self.graphtask = asyncio.create_task(self.graph())
+        asyncio.create_task(self.graph_scheduler())
 
     def start(self):
         self.loop = asyncio.new_event_loop()

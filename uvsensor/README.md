@@ -23,5 +23,5 @@
 | adjust graph int {time} | Changes graphing interval |
 | adjust graph line {time} | Changes number of lines of data used to generate graph |
 
-{time} = [floating number] sec, min, hour (plural also works)*
+{time} = [floating number] sec, min, hour (plural also works)*\
 *Only one unit of time per command
