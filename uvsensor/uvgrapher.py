@@ -39,11 +39,10 @@ class UVSlackGrapher:
         ymin, ymax = axes.get_ylim()
         poly = []
         for index, row in data.iterrows():
-            if index > data.index.start:
-                if row["SUDS State"] == "On":
-                    points = [[data.loc[index-1,:]["Days Elapsed"], ymin], [row["Days Elapsed"], ymin], [row["Days Elapsed"], ymax], [data.loc[index-1,:]["Days Elapsed"], ymax]]
-                    polygon = plt.Polygon(points)
-                    poly.append(polygon)
+            if index > data.index.start and row["SUDS State"] == "On" and data.loc[index-1,:]["SUDS State"] == "On":
+                points = [[data.loc[index-1,:]["Days Elapsed"], ymin], [row["Days Elapsed"], ymin], [row["Days Elapsed"], ymax], [data.loc[index-1,:]["Days Elapsed"], ymax]]
+                polygon = plt.Polygon(points)
+                poly.append(polygon)
         coll=PatchCollection(poly, zorder=-1, color="tab:green", alpha=0.125, edgecolor=None, linewidth=None)
         axes.add_collection(coll)
         lines, labels = plot.get_legend_handles_labels()
