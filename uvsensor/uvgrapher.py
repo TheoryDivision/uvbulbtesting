@@ -32,15 +32,14 @@ class UVSlackGrapher:
         rawdata = pd.read_csv(self.filepath)
         data = rawdata.tail(self.graphlast)
         plt.rcParams["figure.dpi"] = 200
-        chans = [0,1]
         headers = []
-        for p in chans: headers.append(f"Pin {p} UV-C Power")
+        for p in self.chans: headers.append(f"Pin {p} UV-C Power")
         plot = data.plot(x="Days Elapsed", y=headers, figsize=(9,9), zorder=2, style=['o']*len(headers))
         axes = plt.gca()
         ymin, ymax = axes.get_ylim()
         poly = []
         for index, row in data.iterrows():
-            if index > 1:
+            if index > data.index.start:
                 if row["SUDS State"] == "On":
                     points = [[data.loc[index-1,:]["Days Elapsed"], ymin], [row["Days Elapsed"], ymin], [row["Days Elapsed"], ymax], [data.loc[index-1,:]["Days Elapsed"], ymax]]
                     polygon = plt.Polygon(points)
