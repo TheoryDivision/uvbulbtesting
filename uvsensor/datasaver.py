@@ -1,6 +1,6 @@
 import asyncio
 import aiofiles
-from aiocsv import AsyncReader, AsyncWriter
+from aiocsv import AsyncWriter
 
 import os
 from datetime import datetime

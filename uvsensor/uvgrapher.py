@@ -80,3 +80,10 @@ class UVSlackGrapher:
                 file=path,
                 initial_comment=message)
 
+    async def thread_finder(self,channel):
+        await self.slack_client.chat_postMessage(
+                channel=channel, 
+                text="Here's the graphing thread.",
+                thread_ts=self.graphts,
+                reply_broadcast=True)
+

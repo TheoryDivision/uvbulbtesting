@@ -13,12 +13,12 @@ class DegTester:
         self.sensor = sensor
         backup_existing(self.filepath, self.imagepath)
         self.sensetask = None
-        self.cycles = 0
+        self.cycle = 0
         
         self.headers = []
         for p in self.chans:
             self.headers.extend([f"Pin {p} Voltage", f"Pin {p} UV-C Power"])
-        self.headers = self.headers + ["Temperature", "Date", "Time", "SUDS State","Days Elapsed"]
+        self.headers = self.headers + ["Temperature", "Date", "Time", "SUDS State","Days Elapsed"] + ["PC On", "PC Off", "RW On", "RW Off", "Graph Int", "Graph Lines", "Cycle"]
         asyncio.run(writedata(self.headers, self.filepath))
 
     async def scheduler(self, interval, function):
@@ -40,15 +40,18 @@ class DegTester:
         self.sensetask = asyncio.create_task(self.scheduler("self.sintoff", self.readandwrite))
         await asyncio.sleep(self.off - self.sintoff)
         self.powertask = asyncio.create_task(self.poweron())
-        self.cycles += 1
+        self.cycle += 1
 
     async def readandwrite(self):
-        self.data = await self.sensor.get_reading()
+        sensor_data = await self.sensor.get_reading()
+        self.data = sensor_data + [self.on/60, self.off/60, self.sinton, self.sintoff, self.gint/60, self.grapher.graphlast, self.cycle]
         await writedata(self.data, self.filepath)
 
     def upload_file(self, channel, message, path): asyncio.run(self.grapher.upload_file(channel, message, path))
 
     def send_message(self, channel, message): asyncio.run(self.grapher.send_message(channel, message))
+
+    def send_message(self, channel): asyncio.run(self.grapher.thread_finder(channel))
 
     def sendlastline(self, channel):
         message = "\n".join(f"{x}:\t{str(y)}" for x, y in zip(self.headers, self.data))
