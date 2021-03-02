@@ -51,10 +51,10 @@ class DegTester:
 
     def send_message(self, channel, message): asyncio.run(self.grapher.send_message(channel, message))
 
-    def send_message(self, channel): asyncio.run(self.grapher.thread_finder(channel))
+    def thread_finder(self, channel): asyncio.run(self.grapher.thread_finder(channel))
 
     def sendlastline(self, channel):
-        message = "\n".join(f"{x}:\t{str(y)}" for x, y in zip(self.headers, self.data))
+        message = "\n".join(f"{x}:\t{str(y)}" for x, y in zip(self.headers, self.data)) if self.data else "No data yet."
         self.send_message(channel, message)
 
     async def main(self):

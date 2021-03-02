@@ -65,7 +65,7 @@ def uvbot(tester):
                 elif any(txt in mtext for txt in data_req):
                     tester.upload_file(channel, "Here is the most recent file:", tester.filepath)
                 elif any(txt in mtext for txt in cycle_req):
-                    tester.send_message(channel, f"Cycle #: {tester.cycle}")
+                    tester.send_message(channel, f"Cycles: {tester.cycle}")
                 elif "latest" in mtext:
                     tester.sendlastline(channel)
                 elif "thread" in mtext:
