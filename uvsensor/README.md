@@ -14,6 +14,7 @@
 | data/csv | Uploads latest data |
 | plot/graph | Uploads latest graph |
 | loop/cycles | Prints current cycle number |
+| thead | Replies in the graphing thread and broadcasts to channel |
 | param | Prints all experiment parameters |
 | latest | Prints latest set of data from sensors |
 | adjust power on {time} | Changes on interval |
