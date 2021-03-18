@@ -56,7 +56,7 @@ class UVSlackGrapher:
         tempax.set_ylabel(ylabel='°C')
         fig = plot.get_figure()
         fig.savefig(self.imagepath)
-        fig.clf(); plot = None; fig = None
+        fig.clf(); plot = None; fig = None; plt.close(fig)
         if not self.gs: self.gs = True
 
     async def post_graph_rep(self):
